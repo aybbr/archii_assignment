@@ -56,14 +56,14 @@ namespace archii_assignment
     public class EventAggregator
     {
         private object lockObj = new object();
-        private Dictionary<Type, IList> subscriber;
+        private Dictionary<Type, IList> subscriber; // Mapping the list of actions to a particular message type
 
         public EventAggregator()
         {
             subscriber = new Dictionary<Type, IList>();
         }
 
-        public void Publish<TMessageType>(TMessageType message)
+        public void Publish<TMessageType>(TMessageType message) // This method takes message as a parameter, filter subscribers list by message type then publish to subs
         {
             Type t = typeof(TMessageType);
             IList sublist;
@@ -82,7 +82,7 @@ namespace archii_assignment
             }
         }
 
-        public Subscription<TMessageType> Subscribe<TMessageType>(Action<TMessageType> action)
+        public Subscription<TMessageType> Subscribe<TMessageType>(Action<TMessageType> action) // takes an action delegate as a parameter
         {
             Type t = typeof(TMessageType);
             IList actionlist;
@@ -91,26 +91,26 @@ namespace archii_assignment
             {
                 if (!subscriber.TryGetValue(t, out actionlist))
                 {
-                    actionlist = new List<Subscription<TMessageType>>();
+                    actionlist = new List<Subscription<TMessageType>>(); // subscribe in particular MessageType
                     actionlist.Add(actiondetail);
                     subscriber.Add(t, actionlist);
                 }
                 else
                 {
-                    actionlist.Add(actiondetail);
+                    actionlist.Add(actiondetail); // creates new entry in Action_MessageType dictionnary
                 }
             }
             return actiondetail;
         }
 
-        public void UnSubscribe<TMessageType>(Subscription<TMessageType> subscription)
+        public void UnSubscribe<TMessageType>(Subscription<TMessageType> subscription) // unsubscribe from particular MessageType , takes subscription object as input parameter
         {
             Type t = typeof(TMessageType);
             if (subscriber.ContainsKey(t))
             {
                 lock(lockObj)
                 {
-                    subscriber[t].Remove(subscription);
+                    subscriber[t].Remove(subscription); // remove object from dictionnary
                 }
                 subscription = null;
             }
